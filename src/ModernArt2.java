@@ -1,8 +1,8 @@
 /* Amaya Bryant
  * Course: CSC 360 - OOP II
  * Date: 10/5/22
- * Assignment: 3 - Modern Art Generator
- * Objective: generate automated modern art (rectangles of different sizes and opacities) using javafx  
+ * Assignment: 4 - Modern Art Generator Enhanced
+ * Objective: generate automated modern art where the user determines the quantity and maximum size of the shapes using javafx  
  */
 import javafx.application.Application;
 import javafx.collections.FXCollections;
@@ -13,32 +13,34 @@ import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.Pane;
 import javafx.stage.Stage;
 import javafx.scene.shape.Rectangle;
+import javafx.scene.shape.Circle;
 import javafx.scene.paint.Color;
 import javafx.scene.layout.HBox;
-import javafx.scene.control.ComboBox;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.scene.control.TextField;
 import javafx.scene.control.Label;
+import javafx.scene.input.KeyCode;
 
 
 public class ModernArt2 extends Application{
-    private TextField objectCount = new TextField();
-    private TextField maxSize = new TextField();
+    private TextField objectCount = new TextField("50");
+    private TextField maxSize = new TextField("100");
     private Button draw = new Button("Draw");
-
-  @Override 
-  public void start(Stage primaryStage) {
-    //Create UI
+    private HBox drawingBarPane;
     Pane artworkPane = new Pane();
-    HBox drawingBarPane = new HBox();
-    drawingBarPane.setSpacing(10);
-    //CircleHandler handlerC = new CircleHandler();
-
+    BorderPane borderpane = new BorderPane();
     String optionsForComboBox [] = {"Circle", "Rectangle"};
-    ComboBox options = new ComboBox(FXCollections.observableArrayList(optionsForComboBox));
-    options.setValue(optionsForComboBox[0]);//sets default option to Circle
-    drawingBarPane.getChildren().add(options);
+    ComboBox comboBox = new ComboBox(FXCollections.observableArrayList(optionsForComboBox));
+    int objectCounter;
+    int maximumSize;
+    
+
+  private Pane HBox(){
+    drawingBarPane = new HBox();
+    drawingBarPane.setSpacing(10);
+    comboBox.setValue(optionsForComboBox[0]);//sets default option to Circle
+    drawingBarPane.getChildren().add(comboBox);
 
     drawingBarPane.getChildren().add(new Label(" Object Count: "));
     drawingBarPane.getChildren().add(objectCount);
@@ -46,27 +48,49 @@ public class ModernArt2 extends Application{
     drawingBarPane.getChildren().add(maxSize);
     drawingBarPane.getChildren().add(draw);
 
-    BorderPane borderpane = new BorderPane();
+    draw.setOnKeyPressed(event -> {
+      if (event.getCode().equals(KeyCode.ENTER)) {
+            drawShapes();
+      }
+      }
+    );
+
+    draw.setOnAction(new EventHandler<ActionEvent>() {
+      public void handle(ActionEvent event){
+        artworkPane.getChildren().clear();
+        objectCounter = 50;
+        maximumSize = 100;
+        drawShapes();
+      }
+      
+    });
+
+    objectCount.setOnAction(new EventHandler<ActionEvent>() {
+      public void handle(ActionEvent event){
+        artworkPane.getChildren().clear();
+        objectCounter = Integer.parseInt(objectCount.getText());
+        maximumSize = Integer.parseInt(maxSize.getText());
+        drawShapes();
+      }  
+    });
+
+    maxSize.setOnAction(new EventHandler<ActionEvent>() {
+      public void handle(ActionEvent event){
+        artworkPane.getChildren().clear();
+        objectCounter = Integer.parseInt(objectCount.getText());
+        maximumSize = Integer.parseInt(maxSize.getText());
+        drawShapes();
+      }
+    });
+
+    return drawingBarPane;
+  }
+
+  @Override 
+  public void start(Stage primaryStage) {
+    //Create UI
     borderpane.setCenter(artworkPane);//place artworkPane in Center
-    borderpane.setBottom(drawingBarPane);//place drawingBarPane at bottom
-
-    
-    Rectangle[] rectangleArray = new Rectangle[50]; 
-    for (int i = 0; i < 49; i++){
-      Rectangle r = new Rectangle();
-
-      r.setX((Math.random() * 550));//can be set at x coordinate 0 to 550
-      r.setY((Math.random() * 250));//can be set at x coordinate 0 to 250
-     
-      r.setWidth((Math.random() * 100) + 10);//min width 20, max width 100
-      r.setHeight((Math.random() * 100) + 10);
- 
-      r.setOpacity(Math.random());
-
-      r.setFill(Color.color(Math.random(), Math.random(), Math.random()));
-      rectangleArray[i] = r; //in the rectangle array, each rectangle = i++
-      artworkPane.getChildren().add(r);
-    }
+    borderpane.setBottom(HBox());//place drawingBarPane at bottom
 
     Scene scene = new Scene(borderpane, 650, 400);//make room at bottom for hbox by increasing length to 400 
     primaryStage.setTitle("Modern Art Generator"); // stage title
@@ -74,24 +98,55 @@ public class ModernArt2 extends Application{
     primaryStage.show(); // Display the stage
   }
 
-  class CircleHandler implements EventHandler<ActionEvent>{
-    @Override
-    public void handle(ActionEvent e){
-
-    }
-  }
-  class RectangleHandler implements EventHandler<ActionEvent>{
-    @Override
-    public void handle(ActionEvent e){
-        
-    }
-  }
-
   private void drawShapes(){
-    double objectCounter = Double.parseDouble(objectCount.getText());
-    double maximumSize = Double.parseDouble(maxSize.getText());
-    //if cirlce 
-    //if rectangle 
+    if (comboBox.getValue()=="Rectangle"){
+      Rectangle[] rectangleArray = new Rectangle[objectCounter]; 
+      for (int i = 0; i < objectCounter - 1; i++){
+        Rectangle r = new Rectangle();
+
+        r.setX(getX());
+        r.setY(getY());
+        r.setWidth(getMaxSize());
+        r.setHeight(getMaxSize());
+  
+        r.setOpacity(Math.random());
+        r.setFill(randomColor());
+        rectangleArray[i] = r; //in the rectangle array, each rectangle = i++
+        artworkPane.getChildren().add(r);
+      }
+    } else {
+      Circle[] circleArray = new Circle[objectCounter];
+      for (int i = 0; i < objectCounter - 1; i++){
+        Circle c = new Circle();
+
+        c.setCenterX(getX());
+        c.setCenterY(getY());
+        c.setRadius(getMaxSize());
+
+        c.setOpacity(Math.random());
+        c.setFill(randomColor());
+        circleArray[i] = c;
+        artworkPane.getChildren().add(c);
+      }
+    }
+
+
+  }
+
+  private Color randomColor(){
+    return Color.color(Math.random(), Math.random(), Math.random());
+  }
+
+  private double getX(){
+    return (Math.random() * 600);
+  }
+
+  private double getY(){
+    return (Math.random() * 350);
+  }
+
+  private double getMaxSize(){
+    return ((Math.random() * maximumSize) + 1);
   }
 
   public static void main(String[] args) {
